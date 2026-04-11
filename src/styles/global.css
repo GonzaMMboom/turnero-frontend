@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Manrope', sans-serif;
+  --color-primary-light: #534ad9;
+  --color-primary: #392cc1;
+  --color-primary-dark: #372abf;
+  --color-surface: #f7f9fb;
+  --color-surface-container: #ffffff;
+  --color-surface-dim: #d8dadc;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-surface);
+    color: #191c1e;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  button, 
+  [role="button"],
+  select,
+  summary,
+  input[type="time"],
+  input[type="date"],
+  input[type="checkbox"],
+  input[type="radio"] {
+    cursor: pointer !important;
+  }
+
+  /* Forzar puntero en el icono del reloj/calendario nativo */
+  input[type="time"]::-webkit-calendar-picker-indicator,
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer !important;
+  }
+
+  button:disabled,
+  input:disabled {
+    cursor: not-allowed !important;
+  }
+}
+
+@layer utilities {
+  .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .editorial-shadow {
+      box-shadow: 0px 10px 40px -10px rgba(25, 28, 30, 0.06);
+  }
+  .primary-gradient {
+      background: linear-gradient(135deg, #392cc1 0%, #534ad9 100%);
+  }
+}
