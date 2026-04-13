@@ -15,6 +15,8 @@ export default function NewAppointment() {
   const [clientPhone, setClientPhone] = useState('');
   const [clientEmail, setClientEmail] = useState(''); 
   const [serviceId, setServiceId] = useState(''); 
+  const [isEmergency, setIsEmergency] = useState(false);
+  const [emergencyDuration, setEmergencyDuration] = useState('30');
   
   // Logic to auto-fill client data by DNI
   useEffect(() => {
@@ -171,8 +173,13 @@ export default function NewAppointment() {
         clientDni: clientDni.trim() || undefined,
         clientName,
         clientPhone,
-        clientEmail: clientEmail.trim() || undefined
+        clientEmail: clientEmail.trim() || undefined,
+        isEmergency,
       };
+
+      if (isEmergency) {
+        payload.emergencyDuration = parseInt(emergencyDuration, 10);
+      }
 
       if (serviceId) {
         payload.serviceId = parseInt(serviceId, 10);
@@ -359,9 +366,65 @@ export default function NewAppointment() {
           
           {/* Time Grid Card */}
           <section className="bg-white rounded-xl p-8 shadow-[0px_4px_20px_rgba(0,0,0,0.03)] border border-indigo-50">
-            <h3 className="font-headline font-bold text-lg text-gray-900 mb-6">Horarios Disponibles</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-headline font-bold text-lg text-gray-900">Horarios Disponibles</h3>
+              
+              {/* Emergency Switch */}
+              <div className="flex items-center gap-2" title="Inserta un turno empujando los siguientes hacia adelante">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Entreturno:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEmergency(!isEmergency);
+                    setSelectedTime('');
+                  }}
+                  className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+                    isEmergency ? 'bg-amber-500' : 'bg-slate-200'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform duration-200 ${
+                      isEmergency ? 'translate-x-5' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
             
-            {loadingSlots ? (
+            {isEmergency ? (
+              <div className="py-6 flex flex-col items-center justify-center bg-amber-50 rounded-xl border border-amber-200 animate-in fade-in">
+                <span className="material-symbols-outlined text-amber-500 text-3xl mb-3">warning</span>
+                <p className="text-sm font-bold text-amber-900 mb-1">Modo Entreturno Activado</p>
+                <p className="text-xs text-amber-700 text-center px-6 mb-4">
+                  Podés agendar en cualquier horario. Los turnos posteriores de este día serán desplazados hacia adelante de forma automática.
+                </p>
+                <div className="flex gap-4 w-full max-w-[280px]">
+                  <div className="flex flex-col gap-2 flex-1">
+                    <label className="text-[10px] uppercase font-bold text-amber-800 tracking-widest text-center">Elegir Hora</label>
+                    <input
+                      type="time"
+                      value={selectedTime}
+                      onChange={(e) => setSelectedTime(e.target.value)}
+                      className="px-4 py-3 bg-white border border-amber-300 rounded-lg text-amber-900 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 text-center w-full"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2 flex-1">
+                    <label className="text-[10px] uppercase font-bold text-amber-800 tracking-widest text-center">Duración (min)</label>
+                    <select
+                      value={emergencyDuration}
+                      onChange={(e) => setEmergencyDuration(e.target.value)}
+                      className="px-4 py-3 bg-white border border-amber-300 rounded-lg text-amber-900 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 text-center w-full"
+                    >
+                      <option value="15">15 min</option>
+                      <option value="30">30 min</option>
+                      <option value="45">45 min</option>
+                      <option value="60">60 min</option>
+                      <option value="90">90 min</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            ) : loadingSlots ? (
               <div className="py-10 flex flex-col items-center justify-center text-slate-400">
                 <span className="material-symbols-outlined animate-spin text-3xl mb-2">progress_activity</span>
                 <p className="text-xs font-label uppercase tracking-widest">Calculando disponibilidad...</p>
@@ -462,10 +525,11 @@ export default function NewAppointment() {
                 <label className="block font-label text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">DNI / Identificación <span className="text-red-500">*</span></label>
                 <input 
                   value={clientDni}
-                  onChange={e => setClientDni(e.target.value)}
+                  onChange={e => setClientDni(e.target.value.replace(/[^0-9]/g, ''))}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none transition-all placeholder:text-slate-300 text-gray-900" 
                   placeholder="Sin puntos ni espacios" 
                   type="text" 
+                  inputMode="numeric"
                 />
                 <p className="mt-1 text-[10px] text-slate-400">Si el cliente ya existe, los datos se completarán automáticamente.</p>
               </div>
@@ -485,10 +549,11 @@ export default function NewAppointment() {
                 <label className="block font-label text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">Teléfono <span className="text-red-500">*</span></label>
                 <input 
                   value={clientPhone}
-                  onChange={e => setClientPhone(e.target.value)}
+                  onChange={e => setClientPhone(e.target.value.replace(/[^0-9]/g, ''))}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none transition-all placeholder:text-slate-300 text-gray-900" 
-                  placeholder="+54 9 11 ..." 
+                  placeholder="Ej: 1122334455" 
                   type="tel" 
+                  inputMode="numeric"
                 />
               </div>
 

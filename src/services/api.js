@@ -5,7 +5,7 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // 🔥 clave para cookies httpOnly
+  withCredentials: true, // clave para cookies httpOnly
 });
 
 // --- Interceptor de REQUEST ---
@@ -23,7 +23,7 @@ api.interceptors.response.use(
   (error) => {
     const status = error?.response?.status;
 
-    // 🔥 Manejo global de auth
+    // Manejo global de auth
     if (status === 401) {
       console.warn("No autenticado / sesión expirada");
 
@@ -31,7 +31,7 @@ api.interceptors.response.use(
       // window.location.href = "/login";
     }
 
-    // 🔥 Podés manejar otros errores globales
+    // Podés manejar otros errores globales
     if (status === 500) {
       console.error("Error interno del servidor");
     }

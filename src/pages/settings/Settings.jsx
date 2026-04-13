@@ -143,6 +143,39 @@ export default function Settings() {
     }));
   };
 
+  const handleReplicateDay = (sourceDayKey) => {
+    const sourceSlots = hours[sourceDayKey];
+    if (sourceSlots.length === 0) return;
+
+    if (!window.confirm('¿Seguro que deseas copiar este horario al resto de los días? Esto reemplazará los horarios actuales.')) {
+      return;
+    }
+
+    const newHours = { ...hours };
+    const newDeletedIds = [...deletedIds];
+
+    DAYS.forEach(({ key }) => {
+      if (key !== sourceDayKey) {
+        // Collect existing IDs that will be replaced, to delete them in DB
+        hours[key].forEach(slot => {
+          if (slot.id) {
+            newDeletedIds.push(slot.id);
+          }
+        });
+
+        // Copy source slots, omitting the `id` so they are created as new
+        newHours[key] = sourceSlots.map(slot => ({
+          from: slot.from,
+          to: slot.to,
+          active: slot.active
+        }));
+      }
+    });
+
+    setDeletedIds(newDeletedIds);
+    setHours(newHours);
+  };
+
   const handleHourChange = (dayKey, index, field, val) => {
     setHours(h => ({
       ...h,
@@ -386,13 +419,25 @@ export default function Settings() {
                         {label}
                       </span>
                     </div>
-                    <button
-                      onClick={() => handleAddSlot(key)}
-                      className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-sm">add</span>
-                      Añadir Rango
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {hours[key].length > 0 && (
+                        <button
+                          onClick={() => handleReplicateDay(key)}
+                          className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+                          title="Copiar horario al resto de los días"
+                        >
+                          <span className="material-symbols-outlined text-sm">content_copy</span>
+                          Copiar a todos
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleAddSlot(key)}
+                        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-sm">add</span>
+                        Añadir Rango
+                      </button>
+                    </div>
                   </div>
 
                   {hours[key].length === 0 ? (
